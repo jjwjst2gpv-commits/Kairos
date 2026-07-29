@@ -408,7 +408,7 @@
     .coffee-outbound-start-only .route-add-stop-section { display: none; }
     .home-page { background: #080A0D; }
     .home-content { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: calc(12px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom)); background: radial-gradient(ellipse 88% 32% at 50% 0%, rgba(19,47,63,.24), transparent 72%), #080A0D; }
-    .home-hero { height: clamp(234px, 73vw, 306px); min-height: 0; margin: 0 -14px -5px; overflow: hidden; background: #05070A url('file:///C:/Users/amatei/Pictures/Screenshots/Screenshot%202026-07-28%20235350.png') center top / 100% auto no-repeat; }
+    .home-hero { height: clamp(234px, 73vw, 306px); min-height: 0; margin: 0 -14px -5px; overflow: hidden; background: #05070A url('./kairos-home-hero.png') center top / 100% auto no-repeat; }
     .home-hero::before, .home-hero::after, .home-road-trail, .home-brand { display: none; }
     .home-drive-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(7px, 1.9vw, 9px); margin-top: -3px; position: relative; z-index: 1; }
     .home-drive-card { position: relative; display: grid; min-width: 0; height: clamp(112px, 30vw, 126px); align-content: space-between; justify-items: center; padding: 12px 4px 10px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--home-accent) 62%, #20242A); border-radius: 24px; color: var(--text); background: linear-gradient(160deg, rgba(18,25,31,.9), rgba(5,8,12,.95)); box-shadow: inset 0 1px 0 rgba(255,255,255,.055), inset 0 -15px 24px rgba(0,0,0,.32), 0 0 12px color-mix(in srgb, var(--home-accent) 12%, transparent); isolation: isolate; text-align: center; }
@@ -1117,6 +1117,23 @@
     body.night-drive-reference-flow .stops-footer-button { height: 52px; border: 1px solid rgba(102,112,127,.38); border-radius: 16px; color: #c4ccd7; background: linear-gradient(180deg, #202630, #171b23); box-shadow: inset 0 1px 0 rgba(255,255,255,.045), inset 0 -6px 11px rgba(0,0,0,.12); font-size: 16px; font-weight: 620; }
     body.night-drive-reference-flow .stops-footer-button.save { border-color: rgba(123,138,255,.74); color: #fff; background: radial-gradient(ellipse 62% 72% at 50% 0%, rgba(255,255,255,.15), transparent 74%), linear-gradient(102deg, #26d8ed 0%, #1c82f8 48%, #ba31ed 100%); box-shadow: 0 9px 20px rgba(29,127,248,.21), 0 8px 18px rgba(180,41,237,.18), inset 0 1px 0 rgba(255,255,255,.19), inset 0 -7px 13px rgba(64,0,115,.13); }
     body.night-drive-reference-flow .stops-footer-button:active, body.night-drive-reference-flow .stops-add-primary:active { transform: translateY(1px) scale(.985); }
+
+    /* Closed portal roots are not rendered, so they cannot intercept an iPhone touch. */
+    .modal-layer:not(.open), .style-sheet-layer:not(.open), .stops-sheet-layer:not(.open), .friends-sheet-layer:not(.open), .rules-sheet-layer:not(.open), .address-sheet-layer:not(.open), .kairos-intro:not(.show) { display: none; }
+
+    /* iPhone Safari: use document scrolling for Drive pages; the bottom bar is the only fixed touch surface. */
+    @media (max-width: 600px) {
+      html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; }
+      .flow-shell { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+      .flow-page { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+      .flow-page .content { min-height: auto; flex: 1 0 auto; overflow: visible; overscroll-behavior: auto; padding-bottom: calc(118px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+      .flow-page, .flow-page .content { pointer-events: auto; }
+      .flow-page .content::before, .flow-page .content::after, .flow-page .bottom-action::before, .flow-page .bottom-action::after { pointer-events: none; }
+      .flow-page .bottom-action { position: fixed; z-index: 20; top: auto; right: auto; bottom: 0; left: 50%; width: min(100%, 430px); height: auto; pointer-events: auto; transform: translateX(-50%); }
+      .home-content { min-height: 100vh; min-height: 100dvh; flex: 1 0 auto; overflow: visible; overscroll-behavior: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+      .activity-map-page { height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; overflow: hidden; }
+      .route-map, .interactive-map-surface, .interactive-map-surface .maplibregl-canvas-container { touch-action: none; }
+    }
 
     @media (max-width: 480px) { .start-time-input { display: block; width: calc(100% - 10px); margin-right: auto; margin-left: auto; } }
     @media (max-width: 374px) { .content { padding-right: 20px; padding-left: 20px; } .bottom-action { padding-right: 20px; padding-left: 20px; } .style-grid { gap: 8px; } .style-option { font-size: 14px; } }
@@ -2022,6 +2039,35 @@
       function setActiveScreen(screenClass) {
         flowShell.classList.remove('home-active', 'details-active', 'route-active', 'coffee-stop-active', 'return-drive-active', 'people-active', 'review-active', 'activity-map-active');
         flowShell.classList.add(screenClass);
+        const activePage = {
+          'home-active': homePage,
+          'details-active': detailsPage,
+          'route-active': routePage,
+          'coffee-stop-active': coffeeStopPage,
+          'return-drive-active': returnDrivePage,
+          'people-active': peoplePage,
+          'review-active': reviewPage,
+          'activity-map-active': activityMapPage
+        }[screenClass];
+        if (activePage) {
+          activePage.removeAttribute('inert');
+          activePage.setAttribute('aria-hidden', 'false');
+          activePage.style.pointerEvents = 'auto';
+        }
+        releaseDriveInteractionLocks();
+        if (window.matchMedia('(max-width: 600px)').matches) window.scrollTo(0, 0);
+      }
+
+      function releaseDriveInteractionLocks() {
+        [document.documentElement, document.body, flowShell].forEach(element => {
+          element.style.overflow = '';
+          element.style.position = '';
+          element.style.top = '';
+          element.style.width = '';
+          element.style.touchAction = '';
+          element.style.pointerEvents = '';
+        });
+        document.body.classList.remove('modal-open', 'no-scroll', 'lock-scroll', 'disable-touch', 'is-transitioning');
       }
 
       function transitionToHome() {
